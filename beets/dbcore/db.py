@@ -681,7 +681,7 @@ class Model(ABC, Generic[D]):
         """Get a mapping containing all values on this object formatted
         as human-readable unicode strings.
         """
-        return self._formatter(self, included_keys, for_path)
+        return FormattedMapping(self, included_keys, for_path)
 
     def evaluate_template(
         self,

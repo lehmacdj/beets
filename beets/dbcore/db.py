@@ -594,7 +594,7 @@ class Model(object):
         """Get a mapping containing all values on this object formatted
         as human-readable unicode strings.
         """
-        return self._formatter(self, for_path)
+        return FormattedMapping(self, for_path)
 
     def evaluate_template(self, template, for_path=False):
         """Evaluate a template (a string or a `Template` object) using

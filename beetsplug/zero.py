@@ -35,6 +35,13 @@ class ZeroPlugin(BeetsPlugin):
             "import_task_choice", self.import_task_choice_event
         )
 
+        # this is a hack to make zero only operate when importing, the idea is
+        # that we listen for import_begin event and set importing to true if
+        # that is the case. We only write when intercepting a write event
+        # if we are importing
+        self.importing = False
+        self.register_listener('import_begin', self.import_begin)
+
         self.config.add(
             {
                 "auto": True,
@@ -110,8 +117,11 @@ class ZeroPlugin(BeetsPlugin):
             self.warned = True
         # TODO request write in as-is mode
 
+    def import_begin(self, session):
+        self.importing = True
+
     def write_event(self, item, path, tags):
-        if self.config["auto"]:
+        if self.config["auto"] and self.importing:
             self.set_fields(item, tags)
 
     def set_fields(self, item, tags):

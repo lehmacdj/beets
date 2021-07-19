@@ -28,7 +28,7 @@ def vlc_safe_template_func(text):
     text_out = ''
     for c in text:
         if c == '#':
-            continue
+            text_out += '_'
         elif c == '[':
             text_out += '('
         elif c == ']':

@@ -24,6 +24,7 @@ from datetime import datetime, timedelta
 import unicodedata
 from functools import reduce
 import six
+from random import shuffle
 
 if not six.PY2:
     buffer = memoryview  # sqlite won't accept memoryview in python 2
@@ -938,3 +939,16 @@ class NullSort(Sort):
 
     def __hash__(self):
         return 0
+
+class RandomizedSort(Sort):
+    """'Sort' by randomizing the order of elements."""
+
+    def sort(self, items):
+        shuffle(items)
+        return items
+
+    def is_slow(self):
+        return True
+
+    def __hash__(self):
+        return hash(91)

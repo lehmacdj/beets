@@ -199,6 +199,8 @@ def construct_sort_part(
     assert part, "part must be a field name and + or -"
     field = part[:-1]
     assert field, "field is missing"
+    if field == "randomized":
+        return query.RandomizedSort()
     direction = part[-1]
     assert direction in ("+", "-"), "part must end with + or -"
     is_ascending = direction == "+"

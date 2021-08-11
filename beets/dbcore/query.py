@@ -23,8 +23,10 @@ from collections.abc import Iterator, MutableSequence, Sequence
 from datetime import datetime, timedelta
 from functools import reduce
 from operator import mul, or_
+from random import shuffle
 from re import Pattern
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union
+import six
 
 from beets import util
 
@@ -1052,3 +1054,17 @@ class SmartArtistSort(FieldSort):
             return val.lower() if self.case_insensitive else val
 
         return sorted(objs, key=key, reverse=not self.ascending)
+
+
+class RandomizedSort(Sort):
+    """'Sort' by randomizing the order of elements."""
+
+    def sort(self, items):
+        shuffle(items)
+        return items
+
+    def is_slow(self):
+        return True
+
+    def __hash__(self):
+        return hash(91)

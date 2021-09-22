@@ -20,10 +20,10 @@ import re
 import unicodedata
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, MutableSequence, Sequence
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from functools import reduce
 from operator import mul, or_
-from random import shuffle
+import random
 from re import Pattern
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union
 import six
@@ -1060,7 +1060,11 @@ class RandomizedSort(Sort):
     """'Sort' by randomizing the order of elements."""
 
     def sort(self, items):
-        shuffle(items)
+        today = date.today()
+        # perform a sort that is stable within a given month on a given set of
+        # items
+        seed = today.year * 100 + today.month
+        random.Random(seed).shuffle(items)
         return items
 
     def is_slow(self):

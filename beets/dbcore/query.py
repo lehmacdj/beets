@@ -20,11 +20,11 @@ from __future__ import division, absolute_import, print_function
 import re
 from operator import mul
 from beets import util
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import unicodedata
 from functools import reduce
 import six
-from random import shuffle
+import random
 
 if not six.PY2:
     buffer = memoryview  # sqlite won't accept memoryview in python 2
@@ -944,7 +944,11 @@ class RandomizedSort(Sort):
     """'Sort' by randomizing the order of elements."""
 
     def sort(self, items):
-        shuffle(items)
+        today = date.today()
+        # perform a sort that is stable within a given month on a given set of
+        # items
+        seed = today.year * 100 + today.month
+        random.Random(seed).shuffle(items)
         return items
 
     def is_slow(self):

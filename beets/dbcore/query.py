@@ -1057,15 +1057,33 @@ class SmartArtistSort(FieldSort):
 
 
 class RandomizedSort(Sort):
-    """'Sort' by randomizing the order of elements."""
+    """'Sort' by randomizing the order of elements. This sort is stable within
+    a month given the same set of items and somewhat resilient to new items
+    being added (i.e. most of the time the list stays mostly the same if an
+    item in the list is changed).
+    """
 
     def sort(self, items):
         today = date.today()
-        # perform a sort that is stable within a given month on a given set of
-        # items
+        # generate a seed from only the day + month so it doesn't change within
+        # a month
         seed = today.year * 100 + today.month
-        random.Random(seed).shuffle(items)
-        return items
+        r = random.Random(seed)
+        # sort by something fairly stable, unique and immutable that tends to
+        # increase so that when new items are added they don't interfere with
+        # the previous arrangement
+        # this ends up working fairly well in practice because it works
+        # perfectly (list is same except new item) when the changed item is the
+        # newest and the list only changes by a maximum of the number of items
+        # newer than the item that changed
+        items.sort(key=lambda item: [item.added, item.id])
+        new_items = []
+        for item in items:
+            # this is really slow asymptotically, but a more sophisticated data
+            # structure is expensive to develop and the asymptotics don't
+            # really matter because n < 10000 for sure
+            new_items.insert(r.randint(0, len(new_items)), item)
+        return new_items
 
     def is_slow(self):
         return True

@@ -22,9 +22,10 @@ from operator import mul
 from beets import util
 from datetime import datetime, timedelta, date
 import unicodedata
-from functools import reduce
+from functools import reduce, partial
 import six
 import random
+from dataclasses import dataclass, field
 
 if not six.PY2:
     buffer = memoryview  # sqlite won't accept memoryview in python 2
@@ -940,6 +941,17 @@ class NullSort(Sort):
     def __hash__(self):
         return 0
 
+def location_for_item(today, item):
+    """Pure. generate a deterministic but random integer based on the
+    month / year / item id
+    """
+    @dataclass(eq=True, frozen=True)
+    class ItemInfoForLocation:
+        id: int
+        month: int
+        year: int
+    return hash(ItemInfoForLocation(id=item.id, month=today.month, year=today.year))
+
 class RandomizedSort(Sort):
     """'Sort' by randomizing the order of elements. This sort is stable within
     a month given the same set of items and somewhat resilient to new items
@@ -949,25 +961,8 @@ class RandomizedSort(Sort):
 
     def sort(self, items):
         today = date.today()
-        # generate a seed from only the day + month so it doesn't change within
-        # a month
-        seed = today.year * 100 + today.month
-        r = random.Random(seed)
-        # sort by something fairly stable, unique and immutable that tends to
-        # increase so that when new items are added they don't interfere with
-        # the previous arrangement
-        # this ends up working fairly well in practice because it works
-        # perfectly (list is same except new item) when the changed item is the
-        # newest and the list only changes by a maximum of the number of items
-        # newer than the item that changed
-        items.sort(key=lambda item: [item.added, item.id])
-        new_items = []
-        for item in items:
-            # this is really slow asymptotically, but a more sophisticated data
-            # structure is expensive to develop and the asymptotics don't
-            # really matter because n < 10000 for sure
-            new_items.insert(r.randint(0, len(new_items)), item)
-        return new_items
+        items.sort(key=partial(location_for_item, today))
+        return items
 
     def is_slow(self):
         return True

@@ -18,7 +18,7 @@
 from __future__ import division, absolute_import, print_function
 
 from beets.plugins import BeetsPlugin
-from beets.importer import action
+from beets.importer import Action
 
 __author__ = 'lehmacdj@gmail.com'
 
@@ -32,7 +32,7 @@ class EraseOnImportPlugin(BeetsPlugin):
         self.register_listener('import_task_choice', self.import_task_choice)
 
     def import_task_choice(self, session, task):
-        if task.choice_flag == action.APPLY or task.choice_flag == action.ASIS:
+        if task.choice_flag == Action.APPLY or task.choice_flag == Action.ASIS:
             for item in task.imported_items():
                 self._log.debug(u'erasing fields genre and comments for {0}', summary(item))
                 # TODO: generalize by using a config value
